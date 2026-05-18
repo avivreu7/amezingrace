@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Brand Colors */
+  --color-mustard: #E8B400;
+  --color-mustard-light: #FFF3CC;
+  --color-mustard-dark: #C49A00;
+  --color-charcoal: #1A1A1A;
+  --color-charcoal-soft: #2D2D2D;
+  --color-race-red: #D62828;
+  --color-race-red-dark: #A81E1E;
+  --color-off-white: #FAFAF7;
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: "Impact", "Arial Black", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base ── */
+:root {
+  --background: #FAFAF7;
+  --foreground: #1A1A1A;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* ── Envelope Tear Animation ── */
+@keyframes tearTop {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-120%) rotate(-4deg); opacity: 0; }
+}
+@keyframes tearBottom {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120%) rotate(4deg); opacity: 0; }
+}
+@keyframes revealStation {
+  0%   { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.envelope-top {
+  animation: tearTop 0.55s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+.envelope-bottom {
+  animation: tearBottom 0.55s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+.station-reveal {
+  animation: revealStation 0.4s ease-out 0.5s both;
+}
+
+/* ── Pulse badge ── */
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+.animate-pulse-badge {
+  animation: pulse-badge 1.4s ease-in-out infinite;
+}
+
+/* ── Shake on wrong answer ── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
+}
+.animate-shake {
+  animation: shake 0.4s ease-out;
+}
+
+/* ── Slide up ── */
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-up {
+  animation: slideUp 0.35s ease-out both;
+}
+
+/* ── Prevent body scroll when overlay open ── */
+.overflow-hidden-mobile {
+  overflow: hidden;
+  height: 100dvh;
 }
