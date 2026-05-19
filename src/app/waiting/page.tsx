@@ -18,9 +18,16 @@ const STARS = [
   { w: 1, h: 2, top: 78, left: 55, op: 0.4  },
   { w: 1, h: 1, top: 88, left: 35, op: 0.3  },
   { w: 2, h: 2, top: 92, left: 78, op: 0.35 },
-  { w: 1, h: 1, top: 18, left: 52, op: 0.2  },
-  { w: 1, h: 1, top: 30, left: 92, op: 0.3  },
-  { w: 1, h: 1, top: 48, left: 45, op: 0.25 },
+];
+
+// Floating background emojis — fixed positions, no Math.random
+const BG_EMOJIS = [
+  { emoji: "🏃‍♂️", top: 80, left: 8,  delay: 0,    dur: 28 },
+  { emoji: "⚡",    top: 65, left: 88, delay: 5,    dur: 22 },
+  { emoji: "🔥",    top: 75, left: 55, delay: 10,   dur: 32 },
+  { emoji: "💨",    top: 90, left: 30, delay: 3,    dur: 26 },
+  { emoji: "🎯",    top: 70, left: 72, delay: 8,    dur: 30 },
+  { emoji: "🏅",    top: 85, left: 18, delay: 14,   dur: 24 },
 ];
 
 export default function WaitingPage() {
@@ -35,7 +42,6 @@ export default function WaitingPage() {
 
     const supabase = createClient();
 
-    // Re-fetch from DB so we don't act on stale localStorage after a reset
     supabase.from("teams").select("*").eq("id", cached.id).single().then(({ data: fresh }) => {
       const t = fresh ?? cached;
       if (fresh) localStorage.setItem(TEAM_SESSION_KEY, JSON.stringify(fresh));
@@ -61,7 +67,6 @@ export default function WaitingPage() {
     return () => { supabase.removeChannel(channel); };
   }, [router]);
 
-  // Animate dots
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 600);
     return () => clearInterval(id);
@@ -71,17 +76,28 @@ export default function WaitingPage() {
 
   return (
     <main
-      className="relative flex flex-col min-h-dvh overflow-hidden"
+      className="relative flex flex-col h-dvh overflow-hidden"
       style={{ background: "linear-gradient(160deg,#0a1628 0%,#0d2044 50%,#0a1628 100%)" }}
     >
-      {/* Stars */}
+      {/* ── Stars ── */}
       <div className="absolute inset-0 pointer-events-none">
         {STARS.map((s, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white"
-            style={{ width: s.w, height: s.h, top: `${s.top}%`, left: `${s.left}%`, opacity: s.op }}
-          />
+          <div key={i} className="absolute rounded-full bg-white"
+            style={{ width: s.w, height: s.h, top: `${s.top}%`, left: `${s.left}%`, opacity: s.op }} />
+        ))}
+      </div>
+
+      {/* ── Floating emoji particles ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {BG_EMOJIS.map((e, i) => (
+          <div key={i} className="absolute text-2xl animate-drift-up select-none"
+            style={{
+              top: `${e.top}%`, left: `${e.left}%`,
+              opacity: 0.13,
+              animationDuration: `${e.dur}s`,
+              animationDelay: `${e.delay}s`,
+            }}
+          >{e.emoji}</div>
         ))}
       </div>
 
@@ -89,62 +105,68 @@ export default function WaitingPage() {
       <div className="h-1 shrink-0" style={{ background: "linear-gradient(90deg,#D62828,#FFD700,#D62828)" }} />
 
       {/* Center content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center relative z-10 gap-1">
+
+        {/* STAND BY badge */}
+        <div
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 animate-pulse-badge"
+          style={{
+            background: "rgba(214,40,40,0.15)",
+            border: "1px solid rgba(214,40,40,0.4)",
+            boxShadow: "0 0 20px rgba(214,40,40,0.2)",
+          }}
+        >
+          <span className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: "#ff6b6b" }}>
+            ⚡ STAND BY ⚡
+          </span>
+        </div>
 
         {/* Radar rings */}
-        <div className="relative w-56 h-56 flex items-center justify-center mb-8">
-          {/* Outer ring 1 */}
-          <div
-            className="absolute rounded-full border"
+        <div className="relative flex items-center justify-center mb-6" style={{ width: 240, height: 240 }}>
+          {[
+            { size: 240, op: "rgba(255,215,0,0.12)", delay: "0s" },
+            { size: 196, op: "rgba(255,215,0,0.22)", delay: "0.6s" },
+            { size: 152, op: "rgba(255,215,0,0.35)", delay: "1.2s" },
+          ].map((r, i) => (
+            <div key={i} className="absolute rounded-full border-2"
+              style={{
+                width: r.size, height: r.size,
+                borderColor: r.op,
+                animation: `radarPulse 2.2s ease-out ${r.delay} infinite`,
+              }}
+            />
+          ))}
+
+          {/* Inner gold fill ring */}
+          <div className="absolute rounded-full"
             style={{
-              width: 224, height: 224,
-              borderColor: "rgba(255,215,0,0.08)",
-              animation: "radarPulse 2.4s ease-out infinite",
+              width: 116, height: 116,
+              background: "radial-gradient(circle, rgba(255,215,0,0.12) 0%, transparent 70%)",
             }}
           />
-          {/* Outer ring 2 */}
-          <div
-            className="absolute rounded-full border"
-            style={{
-              width: 184, height: 184,
-              borderColor: "rgba(255,215,0,0.12)",
-              animation: "radarPulse 2.4s ease-out 0.6s infinite",
-            }}
+
+          {/* Spinning orbit ring */}
+          <div className="absolute rounded-full border border-yellow-400/30"
+            style={{ width: 100, height: 100, animation: "spin 6s linear infinite" }}
           />
-          {/* Middle ring */}
-          <div
-            className="absolute rounded-full border"
-            style={{
-              width: 144, height: 144,
-              borderColor: "rgba(255,215,0,0.18)",
-              animation: "radarPulse 2.4s ease-out 1.2s infinite",
-            }}
-          />
-          {/* Inner glow */}
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: 104, height: 104,
-              background: "radial-gradient(circle,rgba(255,215,0,0.15) 0%,transparent 70%)",
-            }}
-          />
+
           {/* Center icon */}
           <div
-            className="relative w-20 h-20 rounded-full flex items-center justify-center animate-float"
+            className="relative w-24 h-24 rounded-full flex items-center justify-center animate-float"
             style={{
-              background: "radial-gradient(circle at 35% 35%,#1a3a6a 0%,#0a1628 100%)",
-              border: "2px solid rgba(255,215,0,0.3)",
-              boxShadow: "0 0 30px rgba(255,215,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+              background: "radial-gradient(circle at 35% 35%,#1e4080 0%,#0a1628 100%)",
+              border: "2px solid rgba(255,215,0,0.45)",
+              boxShadow: "0 0 40px rgba(255,215,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
             }}
           >
-            <span className="text-4xl animate-glow-gold">🏁</span>
+            <span className="text-5xl animate-glow-gold">🏁</span>
           </div>
         </div>
 
         {/* Team name */}
         {team && (
-          <div className="mb-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] mb-1" style={{ color: "rgba(255,215,0,0.5)" }}>
+          <div className="mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] mb-1" style={{ color: "rgba(255,215,0,0.55)" }}>
               הקבוצה שלכם
             </p>
             <h1
@@ -165,46 +187,42 @@ export default function WaitingPage() {
         )}
 
         {/* Status */}
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <p className="text-white font-bold text-lg">
-            ממתינים להתחלה{dots}
+        <div className="flex flex-col items-center gap-1.5">
+          <p className="text-white font-black text-xl">
+            ממתינים להזנקה{dots}
           </p>
-          <p className="text-white/35 text-sm max-w-xs leading-relaxed">
-            מנהל המירוץ יפתח את האזעקה בקרוב.
-            <br />הישארו ממוקדים ומוכנים!
+          <p className="text-white/45 text-sm max-w-xs leading-relaxed">
+            🔥 התכוננו — זה קורה עכשיו!
           </p>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 mt-8">
-          <div className="h-px w-10" style={{ background: "rgba(255,215,0,0.2)" }} />
-          <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.2)" }}>
-            מחכים לאדמין
-          </span>
-          <div className="h-px w-10" style={{ background: "rgba(255,215,0,0.2)" }} />
+          <p className="text-white/30 text-xs mt-1">
+            מנהל המירוץ יפתח את ההזנקה בקרוב
+          </p>
         </div>
 
         {/* Pulsing dots */}
-        <div className="flex gap-2 mt-5">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full"
+        <div className="flex gap-2 mt-6">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-full"
               style={{
+                width: i === 2 ? 10 : 7,
+                height: i === 2 ? 10 : 7,
                 background: "#FFD700",
-                animation: `pulse-badge 1.4s ease-in-out ${i * 0.25}s infinite`,
+                animation: `pulse-badge 1.4s ease-in-out ${i * 0.2}s infinite`,
               }}
             />
           ))}
         </div>
       </div>
 
-      {/* Radar pulse keyframe (inline) */}
       <style>{`
         @keyframes radarPulse {
-          0%   { opacity: 0.8; transform: scale(0.95); }
-          50%  { opacity: 0.4; transform: scale(1.02); }
-          100% { opacity: 0.8; transform: scale(0.95); }
+          0%   { opacity: 0.9; transform: scale(0.95); }
+          50%  { opacity: 0.35; transform: scale(1.03); }
+          100% { opacity: 0.9; transform: scale(0.95); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
       `}</style>
     </main>
