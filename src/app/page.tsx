@@ -108,16 +108,18 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-0 mt-4">
 
           {/* Globe with orbiting arrows */}
-          <div className="relative w-44 h-44 flex items-center justify-center mb-1">
+          <div className="relative w-44 h-44 flex items-center justify-center mb-1 animate-float">
+            {/* Outer glow */}
+            <div className="absolute w-44 h-44 rounded-full" style={{ background: "radial-gradient(circle, rgba(74,144,217,0.15) 0%, transparent 70%)" }} />
             {/* Orbit ring */}
-            <div className="absolute w-40 h-40 rounded-full border border-yellow-400/20 animate-spin" style={{ animationDuration: "8s" }} />
-            <div className="absolute w-32 h-32 rounded-full border border-yellow-400/10 animate-spin" style={{ animationDuration: "5s", animationDirection: "reverse" }} />
+            <div className="absolute w-40 h-40 rounded-full border border-yellow-400/25 animate-spin" style={{ animationDuration: "8s" }} />
+            <div className="absolute w-32 h-32 rounded-full border border-yellow-400/15 animate-spin" style={{ animationDuration: "5s", animationDirection: "reverse" }} />
 
             {/* Globe */}
-            <div className="relative w-28 h-28 rounded-full flex items-center justify-center shadow-[0_0_60px_#1a4a8a80]"
+            <div className="relative w-28 h-28 rounded-full flex items-center justify-center"
               style={{
-                background: "radial-gradient(circle at 35% 35%, #4a9ade 0%, #1a5fa8 40%, #0d3060 80%, #061828 100%)",
-                boxShadow: "0 0 40px #1a5fa840, inset -8px -8px 20px #00000060, inset 4px 4px 10px #6ab5f040"
+                background: "radial-gradient(circle at 35% 35%, #5aaae8 0%, #1a5fa8 40%, #0d3060 80%, #061828 100%)",
+                boxShadow: "0 0 50px #1a5fa855, 0 20px 40px rgba(0,0,0,0.5), inset -8px -8px 20px #00000060, inset 4px 4px 12px #7ac5ff30"
               }}>
               {/* Continent silhouettes */}
               <div className="absolute inset-0 rounded-full overflow-hidden opacity-40">
@@ -126,17 +128,19 @@ export default function LoginPage() {
                 <div className="absolute bottom-6 left-4 w-10 h-6 rounded-full bg-green-600/50 rotate-6" />
                 <div className="absolute top-5 right-4 w-7 h-9 rounded-full bg-green-700/60 rotate-3" />
               </div>
+              {/* Specular highlight */}
+              <div className="absolute top-2 left-4 w-8 h-5 rounded-full bg-white/20 rotate-12 blur-sm" />
             </div>
 
             {/* Orbiting arrows */}
             <div className="absolute w-full h-full animate-spin" style={{ animationDuration: "3s" }}>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1">
-                <span style={{ fontSize: "22px", filter: "drop-shadow(0 0 8px #FFD700)" }}>➤</span>
+                <span style={{ fontSize: "22px", filter: "drop-shadow(0 0 10px #FFD700) drop-shadow(0 0 20px #FFD70080)" }}>➤</span>
               </div>
             </div>
             <div className="absolute w-full h-full animate-spin" style={{ animationDuration: "3s", animationDelay: "-1.5s" }}>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 rotate-180">
-                <span style={{ fontSize: "22px", filter: "drop-shadow(0 0 8px #FFD700)" }}>➤</span>
+                <span style={{ fontSize: "22px", filter: "drop-shadow(0 0 10px #FFD700) drop-shadow(0 0 20px #FFD70080)" }}>➤</span>
               </div>
             </div>
           </div>
@@ -201,11 +205,12 @@ export default function LoginPage() {
 
           {/* Card */}
           <div
-            className="rounded-2xl p-5 border border-yellow-400/20"
+            className="rounded-2xl p-5 animate-border-glow"
             style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
               backdropFilter: "blur(12px)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)"
+              border: "1px solid rgba(255,215,0,0.25)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)"
             }}
           >
             <p className="text-center text-xs font-bold text-white/40 uppercase tracking-[0.2em] mb-4">
@@ -251,7 +256,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || !code.trim() || !name.trim()}
-                className="relative w-full rounded-xl py-4 font-black text-lg transition-all duration-150 border-2 border-yellow-600/50 overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="relative btn-shimmer w-full rounded-xl py-4 font-black text-lg transition-all duration-150 border-2 border-yellow-600/50 overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
                 style={{
                   background: loading || !code.trim() || !name.trim()
                     ? "linear-gradient(180deg, #c49000 0%, #8a6400 100%)"

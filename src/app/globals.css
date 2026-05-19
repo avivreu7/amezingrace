@@ -92,3 +92,76 @@ body {
   overflow: hidden;
   height: 100dvh;
 }
+
+/* ── Float ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-10px) rotate(1deg); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ── Shimmer gold ── */
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(300%) skewX(-12deg); }
+}
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  animation: shimmer-sweep 2.5s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Glow pulse ── */
+@keyframes glow-gold {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(255,215,0,0.4)); }
+  50%       { filter: drop-shadow(0 0 28px rgba(255,215,0,0.85)) drop-shadow(0 0 50px rgba(255,215,0,0.4)); }
+}
+.animate-glow-gold {
+  animation: glow-gold 2s ease-in-out infinite;
+}
+
+/* ── Twinkle ── */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(2); }
+}
+
+/* ── Scale in ── */
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Scan lines (retro) ── */
+.scan-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── 3D card border glow ── */
+@keyframes border-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08); }
+  50%       { box-shadow: 0 0 40px rgba(255,215,0,0.3),  inset 0 1px 0 rgba(255,255,255,0.12); }
+}
+.animate-border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}

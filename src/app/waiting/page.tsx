@@ -31,16 +31,23 @@ export default function WaitingPage() {
   useEffect(() => {
     const raw = localStorage.getItem(TEAM_SESSION_KEY);
     if (!raw) { router.replace("/"); return; }
-    const t: Team = JSON.parse(raw);
-    setTeam(t);
-    if (t.unlocked_at) { router.replace("/instructions"); return; }
+    const cached: Team = JSON.parse(raw);
 
     const supabase = createClient();
+
+    // Re-fetch from DB so we don't act on stale localStorage after a reset
+    supabase.from("teams").select("*").eq("id", cached.id).single().then(({ data: fresh }) => {
+      const t = fresh ?? cached;
+      if (fresh) localStorage.setItem(TEAM_SESSION_KEY, JSON.stringify(fresh));
+      setTeam(t);
+      if (t.unlocked_at) { router.replace("/instructions"); return; }
+    });
+
     const channel = supabase
-      .channel(`team-start-${t.id}`)
+      .channel(`team-start-${cached.id}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "teams", filter: `id=eq.${t.id}` },
+        { event: "UPDATE", schema: "public", table: "teams", filter: `id=eq.${cached.id}` },
         (payload) => {
           const updated = payload.new as Team;
           if (updated.unlocked_at) {
@@ -123,14 +130,14 @@ export default function WaitingPage() {
           />
           {/* Center icon */}
           <div
-            className="relative w-20 h-20 rounded-full flex items-center justify-center"
+            className="relative w-20 h-20 rounded-full flex items-center justify-center animate-float"
             style={{
               background: "radial-gradient(circle at 35% 35%,#1a3a6a 0%,#0a1628 100%)",
               border: "2px solid rgba(255,215,0,0.3)",
-              boxShadow: "0 0 30px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)",
+              boxShadow: "0 0 30px rgba(255,215,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
             }}
           >
-            <span className="text-4xl" style={{ filter: "drop-shadow(0 0 8px rgba(255,215,0,0.6))" }}>🏁</span>
+            <span className="text-4xl animate-glow-gold">🏁</span>
           </div>
         </div>
 

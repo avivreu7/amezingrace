@@ -43,10 +43,17 @@ export default function StationPage({ params }: { params: Promise<{ order_num: s
   useEffect(() => {
     const raw = localStorage.getItem(TEAM_SESSION_KEY);
     if (!raw) { router.replace("/"); return; }
-    const t: Team = JSON.parse(raw);
-    if (!t.started_at) { router.replace(t.unlocked_at ? "/instructions" : "/waiting"); return; }
-    setTeam(t);
-    loadStation(t);
+    const cached: Team = JSON.parse(raw);
+
+    // Re-fetch from DB to pick up resets and fresh penalty minutes
+    const supabase = createClient();
+    supabase.from("teams").select("*").eq("id", cached.id).single().then(({ data: fresh }) => {
+      const t = fresh ?? cached;
+      if (fresh) localStorage.setItem(TEAM_SESSION_KEY, JSON.stringify(fresh));
+      if (!t.started_at) { router.replace(t.unlocked_at ? "/instructions" : "/waiting"); return; }
+      setTeam(t);
+      loadStation(t);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNum]);
 
@@ -136,7 +143,7 @@ export default function StationPage({ params }: { params: Promise<{ order_num: s
 
   return (
     <div
-      className="relative min-h-dvh flex flex-col overflow-hidden"
+      className="relative h-dvh flex flex-col overflow-hidden"
       style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d2044 50%, #0a1628 100%)" }}
     >
       {/* Envelope tear overlay */}
@@ -201,25 +208,41 @@ export default function StationPage({ params }: { params: Promise<{ order_num: s
 
         {/* Riddle card */}
         <div
-          className="rounded-2xl p-5 animate-slide-up"
+          className="relative rounded-2xl overflow-hidden animate-slide-up scan-lines"
           style={{
             animationDelay: "0.07s",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,215,0,0.2)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)",
+            background: "linear-gradient(135deg, rgba(255,215,0,0.07) 0%, rgba(255,255,255,0.03) 100%)",
+            border: "1px solid rgba(255,215,0,0.3)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 60px rgba(255,215,0,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
           }}
         >
-          {/* Decorative top label */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-base">✉️</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: "#FFD700" }}>
-              המשימה שלכם
-            </span>
-            <div className="flex-1 h-px" style={{ background: "rgba(255,215,0,0.2)" }} />
+          {/* Corner accent */}
+          <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-0 h-0"
+              style={{ borderTop: "48px solid rgba(255,215,0,0.15)", borderLeft: "48px solid transparent" }} />
           </div>
-          <p className="text-white text-base font-semibold leading-relaxed whitespace-pre-wrap">
-            {station.content}
-          </p>
+
+          <div className="p-5">
+            {/* Top label */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-base animate-glow-gold">✉️</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em]" style={{ color: "#FFD700" }}>
+                המשימה שלכם
+              </span>
+              <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.3), transparent)" }} />
+              <span className="text-[9px] font-mono font-bold opacity-30">#{String(orderNum).padStart(2,"0")}</span>
+            </div>
+
+            <p className="text-white text-base font-semibold leading-relaxed whitespace-pre-wrap">
+              {station.content}
+            </p>
+
+            {/* Bottom decorative line */}
+            <div className="mt-4 flex items-center gap-2">
+              <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.2), transparent)" }} />
+              <span className="text-[9px] font-mono opacity-20 uppercase tracking-widest">classified</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -270,7 +293,7 @@ export default function StationPage({ params }: { params: Promise<{ order_num: s
           <button
             type="submit"
             disabled={submitting || !answer.trim()}
-            className="relative w-full rounded-xl py-4 font-black text-lg overflow-hidden transition-all duration-150"
+            className="relative btn-shimmer w-full rounded-xl py-4 font-black text-lg overflow-hidden transition-all duration-150"
             style={{
               background: answer.trim() && !submitting
                 ? "linear-gradient(180deg,#FFD700 0%,#E8A000 50%,#C47800 100%)"
